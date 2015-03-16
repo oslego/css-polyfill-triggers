@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Triggering CSS polyfills with CSS Animations</title>
+</head>
+<style>
+
+  .test{
+    width: 300px;
+    height: 300px;
+    background: flamingo;
+    -webkit-animation-name: "background: flamingo";
+  }
+
+  @media (min-width: 30em){
+    .test{
+      background: boratmankini;
+      -webkit-animation-name: "background: boratmankini";
+    }
+  }
+
+  /*
+    Define CSS Animations with names resembling CSS Declarations.
+    Narrowed to WebKit-prefixed to keep demo simple.
+
+    Apply to elements using regular selectors,
+    then listen for `animationStart` in JavaScript to call polyfills on target elements.
+  */
+  @-webkit-keyframes "background: flamingo" {}
+  @-webkit-keyframes "background: boratmankini" {}
+
+</style>
+<body>
+
+  <div class="test"></div>
+
+  <script>
+
+  CSS = window.CSS || {}
+
+  CSS.polyfill = (function(){
+    var _impl = {};
+
+    var p = function(prop, value, target){
+      if (_impl[prop]){
+        _impl[prop].call(window, value, target)
+      }
+
+      return p
+    }
+
+    p.register = function(prop, fn){
+      _impl[prop] = fn;
+
+      return p
+    }
+
+    p.unregister = function(prop){
+      _impl[prop] = undefined;
+
+      return p
+    }
+
+    return  p;
+
+  })();
+
+  /*
+    Basic and naivé implementation of a polyfill new named colors for background.
+
+    @param value {String} color name
+    @param target {DOMElement} target element onto which to apply the polyfill
+  */
+  function CSSBackgroundPolyfill(value, target){
+    if (!target || !target.style || !value){
+      return;
+    }
+
+    switch (value){
+      case "flamingo":
+        target.style.background = "rgb(245, 100, 130)"
+      break;
+
+      case "boratmankini":
+        target.style.background = "rgb(110, 250, 75)"
+      break;
+
+      default:
+        target.style.background = value;
+    }
+
+    target.textContent = "background: " + value;
+  }
+
+  CSS.polyfill.register('background', CSSBackgroundPolyfill);
+
+
+  /*
+    Listen for `animationStart` events;
+    Narrowed to WebKit-prefixed to keep demo simple.
+
+    If the `animationName` resembles a CSS Declaration,
+    split into property / value,
+    then call any registed polyfill for it.
+  */
+  document.addEventListener('webkitAnimationStart', function(e){
+    console.log(e)
+
+    if (/:/.test(e.animationName)){
+      var decl = e.animationName.split(":");
+      var prop = decl[0].trim();
+      var value = decl[1].trim();
+
+      CSS.polyfill(prop, value, e.target);
+    }
+  })
+
+  </script>
+
+</body>
+</html>
