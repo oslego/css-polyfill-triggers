@@ -9,26 +9,34 @@
   .test{
     width: 300px;
     height: 300px;
+
     background: flamingo;
-    -webkit-animation-name: "background: flamingo";
+    -webkit-animation: background\:flamingo 1s; /* Safari will not trigger 'animationstart' if there's no duration. */
+            animation: background\:flamingo 1s;
   }
 
   @media (min-width: 30em){
     .test{
       background: boratmankini;
-      -webkit-animation-name: "background: boratmankini";
+      -webkit-animation: background\:boratmankini 1s;
+              animation: background\:boratmankini 1s;
     }
   }
 
   /*
     Define CSS Animations with names resembling CSS Declarations.
-    Narrowed to WebKit-prefixed to keep demo simple.
+
+    Colons (:) are escaped with backslash (\) because Firefox does not accept
+    quoted string animation names
 
     Apply to elements using regular selectors,
-    then listen for `animationStart` in JavaScript to call polyfills on target elements.
+    then listen for `animationstart` in JavaScript to call polyfills on target elements.
   */
-  @-webkit-keyframes "background: flamingo" {}
-  @-webkit-keyframes "background: boratmankini" {}
+  @-webkit-keyframes background\:flamingo {to{}} /* Safari will not trigger 'animationstart' if keyframes declaration is empty.  */
+          @keyframes background\:flamingo {to{}}
+
+  @-webkit-keyframes background\:boratmankini {to{}}
+          @keyframes background\:boratmankini {to{}}
 
 </style>
 <body>
@@ -97,15 +105,15 @@
 
 
   /*
-    Listen for `animationStart` events;
-    Narrowed to WebKit-prefixed to keep demo simple.
+    Handler for `animationstart` events;
 
     If the `animationName` resembles a CSS Declaration,
-    split into property / value,
-    then call any registed polyfill for it.
+    split into a property - value pair,
+    and call any registered polyfill for it.
   */
-  document.addEventListener('webkitAnimationStart', function(e){
-    console.log(e)
+
+  function onAnimation(e){
+    console.log(e, e.type)
 
     if (/:/.test(e.animationName)){
       var decl = e.animationName.split(":");
@@ -114,7 +122,10 @@
 
       CSS.polyfill(prop, value, e.target);
     }
-  })
+  }
+
+  document.addEventListener('webkitAnimationStart', onAnimation)
+  document.addEventListener('animationstart', onAnimation)
 
   </script>
 
