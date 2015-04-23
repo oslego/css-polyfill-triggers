@@ -32,11 +32,14 @@
     Apply to elements using regular selectors,
     then listen for `animationstart` in JavaScript to call polyfills on target elements.
   */
-  @-webkit-keyframes background\:flamingo {to{}} /* Safari will not trigger 'animationstart' if keyframes declaration is empty.  */
-          @keyframes background\:flamingo {to{}}
 
-  @-webkit-keyframes background\:boratmankini {to{}}
-          @keyframes background\:boratmankini {to{}}
+  /* Safari will not trigger 'animationstart' if keyframes rule is empty, but CSS declartions may be omitted, ex: @keyframes anim {to{}}  */
+  /* IE 11 will not trigger 'animationstart' if keyframes rule is absolutely empty. Valid CSS declartions needed inside.  */
+  @-webkit-keyframes background\:flamingo {to{opacity: inherit}}
+          @keyframes background\:flamingo {to{opacity: inherit}}
+
+  @-webkit-keyframes background\:boratmankini {to{opacity: inherit}}
+          @keyframes background\:boratmankini {to{opacity: inherit}}
 
 </style>
 <body>
